@@ -1,5 +1,4 @@
 from typing import Any
-from queue import Queue
 
 
 class CSP:
@@ -9,7 +8,7 @@ class CSP:
         domains: dict[str, set],
         edges: list[tuple[str, str]],
     ):
-        """Constructs a CSP instance with the given variables, domains and edges.
+        """Constructs a CSP instance with the given variables, domains, and edges.
 
         Args:
             variables: The variables for the CSP
@@ -47,15 +46,38 @@ class CSP:
                         (value2, value1)
                     )
 
-    def ac_3(self) -> bool:
-        """Performs AC-3 on the CSP.
-        Meant to be run prior to calling backtracking_search() to reduce the search for some problems.
+    # def ac_3(self) -> bool:
+    #     """Performs AC-3 on the CSP.
 
-        Returns:
-            False if a domain becomes empty, otherwise True
-        """
-        # YOUR CODE HERE (and remove the assertion below)
-        assert False, "Not implemented"
+    #     Returns:
+    #         False if a domain becomes empty, otherwise True
+    #     """
+    #     queue = [(x, y) for (x, y) in self.binary_constraints]
+
+    #     while queue:
+    #         (xi, xj) = queue.pop(0)
+
+    #         if self.revise(xi, xj):
+    #             if len(self.domains[xi]) == 0:
+    #                 return False
+
+    #             for xk, _ in self.binary_constraints:
+    #                 if xk != xj:
+    #                     queue.append((xk, xi))
+
+    #     return True
+
+    # def revise(self, xi: str, xj: str) -> bool:
+    #     """Revise the domain of xi based on the binary constraint between xi and xj."""
+    #     revised = False
+    #     for x in set(self.domains[xi]):
+    #         # Check if there is no valid y in the domain of xj that satisfies the constraint
+    #         if not any(
+    #             (x, y) in self.binary_constraints[(xi, xj)] for y in self.domains[xj]
+    #         ):
+    #             self.domains[xi].remove(x)
+    #             revised = True
+    #     return revised
 
     def backtracking_search(self) -> None | dict[str, Any]:
         """Performs backtracking search on the CSP.
@@ -63,10 +85,60 @@ class CSP:
         Returns:
             A solution if any exists, otherwise None
         """
+        # print(self.binary_constraints)
+        # return
 
-        def backtrack(assignment: dict[str, Any]):
-            # YOUR CODE HERE (and remove the assertion below)
-            assert False, "Not implemented"
+        def are_neighbors(a: str, b: str) -> bool:
+            return (a, b) in self.binary_constraints or (
+                b,
+                a,
+            ) in self.binary_constraints
+
+        def is_legal(var: str, value: Any, assignment: dict[str, Any]) -> bool:
+            for neighbor in self.variables:
+                if var == neighbor:
+                    continue
+
+                if neighbor not in assignment:
+                    continue
+
+                neighbor_value = assignment[neighbor]
+
+                if are_neighbors(var, neighbor):
+                    if value == neighbor_value:
+                        return False
+
+            return True
+
+        def backtrack(assignment: dict[str, Any]) -> dict[str, Any]:
+            """The recursive backtracking function."""
+
+            if len(assignment) == len(self.variables):
+                return assignment
+
+            # Select an unassigned variable
+            # unassigned_vars = [v for v in self.variables if v not in assignment]
+            # var = unassigned_vars[0]
+
+            for var in self.variables:
+                if var in assignment:
+                    continue
+
+                for value in self.domains[var]:
+                    if is_legal(var, value, assignment):
+                        # Assign the value
+                        assignment[var] = value
+
+                        # Recur with the updated assignment
+                        result = backtrack(assignment)
+
+                        if result:
+                            return result
+
+                        # If failure, remove the assignment (backtrack)
+                        assignment.pop(var)
+
+                return {}
 
         return backtrack({})
 
