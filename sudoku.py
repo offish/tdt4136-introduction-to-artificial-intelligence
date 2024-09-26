@@ -28,8 +28,8 @@ def main() -> None:
 
     width = 9
     box_width = 3
-
     domains = {}
+
     for row in range(width):
         for col in range(width):
             if grid[row][col] == "0":
@@ -38,13 +38,16 @@ def main() -> None:
                 domains[f"X{row+1}{col+1}"] = {int(grid[row][col])}
 
     edges = []
+
     for row in range(width):
         edges += alldiff([f"X{row+1}{col+1}" for col in range(width)])
+
     for col in range(width):
         edges += alldiff([f"X{row+1}{col+1}" for row in range(width)])
+
     for box_row in range(box_width):
         for box_col in range(box_width):
-            cells = []
+            # cells = []
             edges += alldiff(
                 [
                     f"X{row+1}{col+1}"
@@ -59,7 +62,7 @@ def main() -> None:
         edges=edges,
     )
 
-    print(csp.ac_3())
+    # print(csp.ac_3())
     print_solution(csp.backtracking_search(), width)
 
     # Expected output after implementing csp.ac_3() and csp.backtracking_search():

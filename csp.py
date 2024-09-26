@@ -79,68 +79,64 @@ class CSP:
     #             revised = True
     #     return revised
 
+    def are_neighbors(self, a: str, b: str) -> bool:
+        return (a, b) in self.binary_constraints or (
+            b,
+            a,
+        ) in self.binary_constraints
+
+    def get_neighbor(self, var: str):
+        for neighbor in self.variables:
+            if neighbor == var:
+                continue
+
+            yield neighbor
+
+    def is_allowed(self, var: str, value: Any, assignment: dict[str, Any]) -> bool:
+        for neighbor in self.get_neighbor(var):
+            if neighbor not in assignment:
+                continue
+
+            neighbor_value = assignment[neighbor]
+
+            if self.are_neighbors(var, neighbor) and value == neighbor_value:
+                return False
+
+        return True
+
+    def backtrack(self, assignment: dict[str, Any]) -> dict[str, Any]:
+        """The recursive backtracking function."""
+
+        if len(assignment) == len(self.variables):
+            return assignment
+
+        for var in self.variables:
+            if var in assignment:
+                continue
+
+            for value in self.domains[var]:
+                if self.is_allowed(var, value, assignment):
+                    # Assign the value
+                    assignment[var] = value
+
+                    # Recur with the updated assignment
+                    result = self.backtrack(assignment)
+
+                    if result:
+                        return result
+
+                    # If failure, remove the assignment (backtrack)
+                    assignment.pop(var)
+
+            return {}
+
     def backtracking_search(self) -> None | dict[str, Any]:
         """Performs backtracking search on the CSP.
 
         Returns:
             A solution if any exists, otherwise None
         """
-        # print(self.binary_constraints)
-        # return
-
-        def are_neighbors(a: str, b: str) -> bool:
-            return (a, b) in self.binary_constraints or (
-                b,
-                a,
-            ) in self.binary_constraints
-
-        def is_legal(var: str, value: Any, assignment: dict[str, Any]) -> bool:
-            for neighbor in self.variables:
-                if var == neighbor:
-                    continue
-
-                if neighbor not in assignment:
-                    continue
-
-                neighbor_value = assignment[neighbor]
-
-                if are_neighbors(var, neighbor):
-                    if value == neighbor_value:
-                        return False
-
-            return True
-
-        def backtrack(assignment: dict[str, Any]) -> dict[str, Any]:
-            """The recursive backtracking function."""
-
-            if len(assignment) == len(self.variables):
-                return assignment
-
-            # Select an unassigned variable
-            # unassigned_vars = [v for v in self.variables if v not in assignment]
-            # var = unassigned_vars[0]
-
-            for var in self.variables:
-                if var in assignment:
-                    continue
-
-                for value in self.domains[var]:
-                    if is_legal(var, value, assignment):
-                        # Assign the value
-                        assignment[var] = value
-
-                        # Recur with the updated assignment
-                        result = backtrack(assignment)
-
-                        if result:
-                            return result
-
-                        # If failure, remove the assignment (backtrack)
-                        assignment.pop(var)
-
-                return {}
-
-        return backtrack({})
+        return self.backtrack({})
 
 
 def alldiff(variables: list[str]) -> list[tuple[str, str]]:
