@@ -46,38 +46,63 @@ class CSP:
                         (value2, value1)
                     )
 
-    # def ac_3(self) -> bool:
-    #     """Performs AC-3 on the CSP.
+    def get_column(self, variable: str) -> list[str]:
+        return [var for var in self.variables if var[1] == variable[1]]
 
-    #     Returns:
-    #         False if a domain becomes empty, otherwise True
-    #     """
-    #     queue = [(x, y) for (x, y) in self.binary_constraints]
+    def get_row(self, variable: str) -> list[str]:
+        return [var for var in self.variables if var[2] == variable[2]]
 
-    #     while queue:
-    #         (xi, xj) = queue.pop(0)
+    def get_box(self, variable: str) -> list[str]:
+        # X11
+        # -> X11, X12, X13
+        # -> X21, X22, X23
+        # -> X31, X32, X33
+        row_index = int(variable[1])
+        column_index = int(variable[2])
 
-    #         if self.revise(xi, xj):
-    #             if len(self.domains[xi]) == 0:
-    #                 return False
+        start_row = (row_index - 1) // 3 * 3 + 1
+        start_column = (column_index - 1) // 3 * 3 + 1
 
-    #             for xk, _ in self.binary_constraints:
-    #                 if xk != xj:
-    #                     queue.append((xk, xi))
+        box = []
 
-    #     return True
+        for i in range(3):
+            for j in range(3):
+                position = f"X{start_row + i}{start_column + j}"
+                box.append(position)
 
-    # def revise(self, xi: str, xj: str) -> bool:
-    #     """Revise the domain of xi based on the binary constraint between xi and xj."""
-    #     revised = False
-    #     for x in set(self.domains[xi]):
-    #         # Check if there is no valid y in the domain of xj that satisfies the constraint
-    #         if not any(
-    #             (x, y) in self.binary_constraints[(xi, xj)] for y in self.domains[xj]
-    #         ):
-    #             self.domains[xi].remove(x)
-    #             revised = True
-    #     return revised
+        return box
+
+    def ac_3(self) -> bool:
+        """Performs AC-3 on the CSP.
+
+        Returns:
+            False if a domain becomes empty, otherwise True
+        """
+        for i in self.domains:
+            value = self.domains[i]
+
+            if len(value) != 1:
+                continue
+
+            for j in self.get_column(i):
+                if i == j:
+                    continue
+
+                self.domains[j] -= value
+
+            for j in self.get_row(i):
+                if i == j:
+                    continue
+
+                self.domains[j] -= value
+
+            for j in self.get_box(i):
+                if i == j:
+                    continue
+
+                self.domains[j] -= value
+
+        return len(self.domains) > 1
 
     def are_neighbors(self, a: str, b: str) -> bool:
         return (a, b) in self.binary_constraints or (
@@ -126,7 +151,7 @@ class CSP:
                         return result
 
                     # If failure, remove the assignment (backtrack)
-                    assignment.pop(var)
+                    del assignment[var]
 
             return {}
 

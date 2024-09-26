@@ -2,15 +2,16 @@
 # The CSP.ac_3() and CSP.backtrack() methods need to be implemented
 
 from csp import CSP, alldiff
+import time
 
 
-def print_solution(solution, width) -> None:
+def print_solution(solution, WIDTH) -> None:
     """
     Convert the representation of a Sudoku solution, as returned from
     the method CSP.backtracking_search(), into a Sudoku board.
     """
-    for row in range(width):
-        for col in range(width):
+    for row in range(WIDTH):
+        for col in range(WIDTH):
             print(solution[f"X{row+1}{col+1}"], end=" ")
 
             if col == 2 or col == 5:
@@ -24,14 +25,14 @@ def print_solution(solution, width) -> None:
 
 def main() -> None:
     # Choose Sudoku problem
-    grid = open("sudoku_easy.txt").read().split()
+    grid = open("sudoku_very_hard.txt").read().split()
 
-    width = 9
-    box_width = 3
+    WIDTH = 9
+    BOX_WIDTH = 3
     domains = {}
 
-    for row in range(width):
-        for col in range(width):
+    for row in range(WIDTH):
+        for col in range(WIDTH):
             if grid[row][col] == "0":
                 domains[f"X{row+1}{col+1}"] = set(range(1, 10))
             else:
@@ -39,31 +40,46 @@ def main() -> None:
 
     edges = []
 
-    for row in range(width):
-        edges += alldiff([f"X{row+1}{col+1}" for col in range(width)])
+    for row in range(WIDTH):
+        edges += alldiff([f"X{row+1}{col+1}" for col in range(WIDTH)])
 
-    for col in range(width):
-        edges += alldiff([f"X{row+1}{col+1}" for row in range(width)])
+    for col in range(WIDTH):
+        edges += alldiff([f"X{row+1}{col+1}" for row in range(WIDTH)])
 
-    for box_row in range(box_width):
-        for box_col in range(box_width):
+    for box_row in range(BOX_WIDTH):
+        for box_col in range(BOX_WIDTH):
             # cells = []
             edges += alldiff(
                 [
                     f"X{row+1}{col+1}"
-                    for row in range(box_row * box_width, (box_row + 1) * box_width)
-                    for col in range(box_col * box_width, (box_col + 1) * box_width)
+                    for row in range(box_row * BOX_WIDTH, (box_row + 1) * BOX_WIDTH)
+                    for col in range(box_col * BOX_WIDTH, (box_col + 1) * BOX_WIDTH)
                 ]
             )
 
     csp = CSP(
-        variables=[f"X{row+1}{col+1}" for row in range(width) for col in range(width)],
+        variables=[f"X{row+1}{col+1}" for row in range(WIDTH) for col in range(WIDTH)],
         domains=domains,
         edges=edges,
     )
 
-    # print(csp.ac_3())
-    print_solution(csp.backtracking_search(), width)
+    # print(csp.get_box("X11"))
+    # print(csp.get_box("X12"))
+    # print(csp.get_box("X21"))
+    # print(csp.get_box("X44"))
+    # print(csp.get_box("X77"))
+    # print(csp.get_box("X99"))
+    # Expected output:
+    # X44 X45 X46
+    # X54 X55 X56
+    # X64 X65 X66
+
+    # return
+
+    print(csp.ac_3())
+    time_start = time.time()
+    print_solution(csp.backtracking_search(), WIDTH)
+    print(time.time() - time_start)
 
     # Expected output after implementing csp.ac_3() and csp.backtracking_search():
     # True
