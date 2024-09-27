@@ -5,13 +5,13 @@ from csp import CSP, alldiff
 import time
 
 
-def print_solution(solution, WIDTH) -> None:
+def print_solution(solution: dict, width: int) -> None:
     """
     Convert the representation of a Sudoku solution, as returned from
     the method CSP.backtracking_search(), into a Sudoku board.
     """
-    for row in range(WIDTH):
-        for col in range(WIDTH):
+    for row in range(width):
+        for col in range(width):
             print(solution[f"X{row+1}{col+1}"], end=" ")
 
             if col == 2 or col == 5:
@@ -23,9 +23,11 @@ def print_solution(solution, WIDTH) -> None:
             print("------+-------+------")
 
 
-def main() -> None:
+def main(problem: str) -> None:
     # Choose Sudoku problem
-    grid = open("sudoku_very_hard.txt").read().split()
+    grid = open(problem).read().split()
+
+    print(f"\n\nSudoku problem: {problem}")
 
     WIDTH = 9
     BOX_WIDTH = 3
@@ -48,7 +50,6 @@ def main() -> None:
 
     for box_row in range(BOX_WIDTH):
         for box_col in range(BOX_WIDTH):
-            # cells = []
             edges += alldiff(
                 [
                     f"X{row+1}{col+1}"
@@ -76,10 +77,20 @@ def main() -> None:
 
     # return
 
+    start_time = time.time()
     print(csp.ac_3())
-    time_start = time.time()
+
+    print(csp.domains)
+
+    solution_time = time.time()
     print_solution(csp.backtracking_search(), WIDTH)
-    print(time.time() - time_start)
+    end_time = time.time()
+
+    print(f"AC3 runtime: {solution_time-start_time}")
+    print(f"Backtracking runtime: {end_time-solution_time}")
+    print(f"Total time: {end_time-start_time}")
+    print(f"Total calls: {csp.backtrack_called}")
+    print(f"Total failed: {csp.backtrack_failures}")
 
     # Expected output after implementing csp.ac_3() and csp.backtracking_search():
     # True
@@ -97,4 +108,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    for problem in [
+        "sudoku_easy.txt",
+        "sudoku_medium.txt",
+        "sudoku_hard.txt",
+        "sudoku_very_hard.txt",
+    ]:
+        main(problem)
