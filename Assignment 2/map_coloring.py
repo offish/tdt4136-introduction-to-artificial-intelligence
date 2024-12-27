@@ -1,7 +1,7 @@
 # The map coloring problem from the text book.
 # The CSP.backtrack() method needs to be implemented
 
-from csp import CSP, alldiff
+from csp import CSP
 
 variables = ["WA", "NT", "Q", "NSW", "V", "SA", "T"]
 csp = CSP(
